@@ -2,7 +2,7 @@
 
 本机装了 6 个 agent，skill 散在十几个目录里：用户级的、插件缓存的、应用内置的，还有软链共享的。想知道自己到底有哪些，只能一个个 `ls`。
 
-这个脚本把这些 `SKILL.md` 全收集起来，生成一个能搜、能按来源筛的看板。顺手还有个 macOS 菜单栏壳子，点一下就可以看到下面的效果。
+这个脚本把这些 `SKILL.md` 全收集起来，生成一个能搜、能按来源筛的看板。顺手还有个 macOS 菜单栏壳子。
 
 ![看板](captures/board.png)
 
@@ -15,9 +15,9 @@ python3 scan_skills.py
 open dist/board.html
 ```
 
-第一次跑会从 `config.example.json` 拷一份 `config.json` 出来，里面预置了几个常见 agent 的路径，扫到多少算多少，扫不到的标成 `missing`，不报错。
+第一次跑会从 `config.example.json` 拷一份 `config.json` 出来，里面预置了几个常见 agent 的路径，扫不到的标成 `missing`。
 
-改 `config.json` 指向你自己的目录就行。只用 Python 3 标准库，不装东西，不联网。
+改 `config.json` 指向你自己的目录，只用 Python 3 标准库。
 
 ## 配置
 
