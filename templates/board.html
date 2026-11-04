@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skill Board</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --panel:#ffffff; --hover:#f2f4f7;
+    --text:#16181d; --text-2:#5b6270; --text-3:#6e7684;
+    --line:#e4e7ec; --line-soft:#eef0f4;
+    --accent:#2563eb;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#15171a; --panel:#1c1f23; --hover:#24282d;
+      --text:#e8eaed; --text-2:#a0a7b3; --text-3:#8b93a0;
+      --line:#2f333a; --line-soft:#262a30;
+      --accent:#6f9bff;
+    }
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC",sans-serif;
+    font-size:13px;line-height:1.5;-webkit-font-smoothing:antialiased;
+    padding-bottom:48px;
+  }
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+
+  header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+  .hwrap{max-width:1560px;margin:0 auto;padding:14px 28px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  h1{font-size:15px;font-weight:500;letter-spacing:-.1px}
+  .meta{color:var(--text-3);font-size:12px;font-variant-numeric:tabular-nums}
+  .meta .stale{color:#b45309;background:#fef3c7;border-radius:4px;padding:1px 5px;font-size:11px;margin-left:5px}
+  @media (prefers-color-scheme:dark){ .meta .stale{color:#fcd34d;background:#422c06} }
+  .spacer{flex:1}
+  .stats{display:flex;align-items:center;gap:16px}
+  .stat{display:flex;align-items:baseline;gap:4px;font-variant-numeric:tabular-nums}
+  .stat b{font-size:13px;font-weight:500}
+  .stat span{font-size:11px;color:var(--text-3)}
+
+  .toolbar{max-width:1560px;margin:0 auto;padding:14px 28px 0;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+  .search{position:relative;flex:1;min-width:220px;max-width:380px}
+  .search input{
+    width:100%;height:34px;border:1px solid var(--line);border-radius:10px;background:var(--panel);
+    padding:0 30px 0 32px;font-size:13px;color:var(--text);outline:none;font-family:inherit;
+  }
+  .search input::placeholder{color:var(--text-3)}
+  .search input:focus{border-color:var(--accent)}
+  .search .ico{position:absolute;left:10px;top:9.5px;width:15px;height:15px;stroke:var(--text-3);fill:none;stroke-width:1.8}
+  .search kbd{position:absolute;right:9px;top:9px;font-size:10px;color:var(--text-3);border:1px solid var(--line);border-radius:4px;padding:0 4px;font-family:inherit;line-height:15px}
+
+  .chips{display:flex;gap:3px;flex-wrap:wrap;align-items:center}
+  .chip{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 9px;border-radius:6px;color:var(--text-2);font-size:12px;white-space:nowrap}
+  .chip:hover{background:var(--hover);color:var(--text)}
+  .chip[aria-pressed=true]{background:var(--text);color:var(--bg)}
+  .chip .dot{width:6px;height:6px;border-radius:50%}
+  .chip .c{font-size:11px;opacity:.55;font-variant-numeric:tabular-nums}
+
+  .seg{display:flex;gap:1px;background:var(--line);border-radius:6px;padding:1px}
+  .seg button{padding:0 10px;height:24px;border-radius:5px;font-size:12px;color:var(--text-2);background:transparent}
+  .seg button:hover{color:var(--text)}
+  .seg button[aria-pressed=true]{background:var(--panel);color:var(--text);box-shadow:0 0 0 .5px var(--line)}
+
+  main{max-width:1560px;margin:0 auto;padding:20px 28px 0}
+  .agent-block{margin-bottom:30px}
+  .ahead{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
+  .ahead .dot{width:6px;height:6px;border-radius:50%;transform:translateY(-1px)}
+  .ahead h2{font-size:13px;font-weight:500}
+  .ahead .n{font-size:11px;color:var(--text-3);font-variant-numeric:tabular-nums}
+  .ahead .p{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(276px,1fr));gap:8px}
+  .card{
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 12px 10px;
+    text-align:left;width:100%;display:flex;flex-direction:column;transition:background .12s,border-color .12s;
+  }
+  .card:hover{background:var(--hover);border-color:var(--line)}
+  .ct{display:flex;align-items:center;gap:6px}
+  .ct .dot{width:6px;height:6px;border-radius:50%;flex:0 0 auto}
+  .cname{font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ver{margin-left:auto;font-size:11px;color:var(--text-3);font-variant-numeric:tabular-nums;flex:0 0 auto}
+  .cslug{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;color:var(--text-3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cdesc{color:var(--text-2);font-size:12px;line-height:1.5;margin-top:6px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .card[aria-expanded=true] .cdesc{-webkit-line-clamp:unset}
+  .tags{display:flex;gap:5px;margin-top:auto;padding-top:8px;flex-wrap:wrap;align-items:center}
+  .tag{font-size:11px;color:var(--text-2);background:var(--bg);border-radius:4px;padding:1px 6px;line-height:16px}
+  .tag.src{color:var(--text-3)}
+  .tag.path{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:var(--text-3);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:none}
+  .card[aria-expanded=true] .tag.path{display:inline-block}
+  .empty{color:var(--text-2);text-align:center;padding:64px 20px;font-size:13px;line-height:1.8}
+  .empty button{color:var(--accent);text-decoration:underline;text-underline-offset:2px;display:block;margin:8px auto 0;font-size:13px}
+  mark{background:#fde68a;color:#16181d;border-radius:2px}
+  @media (prefers-color-scheme:dark){ mark{background:#5c4a12;color:#f5e6b8} }
+
+  footer{max-width:1560px;margin:24px auto 0;padding:16px 28px;color:var(--text-3);font-size:11px;border-top:1px solid var(--line-soft)}
+  footer code{font-family:ui-monospace,Menlo,monospace;background:var(--panel);border:1px solid var(--line);padding:1px 5px;border-radius:4px;color:var(--text-2)}
+
+  @media (prefers-reduced-motion:reduce){ *{transition-duration:.01ms !important} }
+  @media (max-width:640px){ .hwrap,.toolbar,main,.dist,footer{padding-left:16px;padding-right:16px} }
+</style>
+</head>
+<body>
+<header>
+  <div class="hwrap">
+    <h1 id="brand">Skill Board</h1>
+    <div class="meta" id="stamp"></div>
+    <div class="spacer"></div>
+    <div class="stats">
+      <div class="stat"><b id="tTotal">0</b><span>个 skill</span></div>
+      <div class="stat"><b id="tAgent">0</b><span>个来源</span></div>
+      <div class="stat"><b id="tShow">0</b><span>显示中</span></div>
+    </div>
+  </div>
+</header>
+
+<div class="toolbar">
+  <div class="search">
+    <svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <input id="q" type="text" placeholder="搜索名称、描述或分类" autocomplete="off" spellcheck="false" aria-label="搜索 skill">
+    <kbd>/</kbd>
+  </div>
+  <div class="chips" id="agentChips" role="group" aria-label="按来源筛选"></div>
+  <div class="seg" id="viewSeg" role="group" aria-label="视图">
+    <button data-v="group" aria-pressed="true">分组</button>
+    <button data-v="flat" aria-pressed="false">平铺</button>
+  </div>
+  <div class="seg" id="sortSeg" role="group" aria-label="排序">
+    <button data-s="agent" aria-pressed="true">来源</button>
+    <button data-s="name" aria-pressed="false">名称</button>
+    <button data-s="time" aria-pressed="false">更新</button>
+  </div>
+</div>
+
+<main id="main"></main>
+
+<footer>
+  数据由 <code>scan_skills.py</code> 生成 · 点击卡片展开完整描述与路径 · <kbd>/</kbd> 搜索 <kbd>esc</kbd> 清空
+</footer>
+
+<script>
+const DATA = /*__DATA__*/;
+document.title = DATA.title || "Skill Board";
+(function(){ const b=document.getElementById("brand"); if(b&&DATA.title) b.textContent=DATA.title; })();
+
+const state = { q:"", agent:"all", view:"group", sort:"agent", open:new Set() };
+const $ = s=>document.querySelector(s);
+const esc = s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const agentMap = Object.fromEntries(DATA.agents.map(a=>[a.key,a]));
+const colorOf = k => (agentMap[k]||{}).color || "#888";
+const labelOf = k => (agentMap[k]||{}).label || k;
+
+(function(){
+  const ageH = (Date.now()/1000 - DATA.generated_ts)/3600;
+  const el = $("#stamp");
+  el.textContent = "扫描于 " + (DATA.generated_at||"").slice(5,16);
+  if(ageH > 24){
+    const s = document.createElement("span");
+    s.className = "stale";
+    s.textContent = "已过期 " + Math.floor(ageH) + "h";
+    el.appendChild(s);
+  }
+})();
+$("#tTotal").textContent = DATA.total;
+$("#tAgent").textContent = DATA.agents.filter(a=>a.count>0).length;
+
+function renderChips(){
+  const el = $("#agentChips");
+  let h = `<button class="chip" data-a="all" aria-pressed="${state.agent==="all"}">全部 <span class="c">${DATA.total}</span></button>`;
+  DATA.agents.forEach(a=>{
+    if(!a.count) return;
+    h += `<button class="chip" data-a="${a.key}" aria-pressed="${state.agent===a.key}"><span class="dot" style="background:${a.color}"></span>${esc(a.label)} <span class="c">${a.count}</span></button>`;
+  });
+  el.innerHTML = h;
+  el.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{ state.agent=c.dataset.a; renderChips(); render(); });
+}
+
+function match(s){
+  if(state.agent!=="all" && s.agent!==state.agent) return false;
+  if(!state.q) return true;
+  const q = state.q.toLowerCase();
+  return (s.name+" "+s.slug+" "+(s.display||"")+" "+s.desc+" "+s.desc_en+" "+s.category+" "+(s.plugin||"")).toLowerCase().includes(q);
+}
+
+function mark(text){
+  if(!state.q) return esc(text);
+  const i = text.toLowerCase().indexOf(state.q.toLowerCase());
+  if(i<0) return esc(text);
+  return esc(text.slice(0,i))+"<mark>"+esc(text.slice(i,i+state.q.length))+"</mark>"+esc(text.slice(i+state.q.length));
+}
+
+function card(s){
+  const id = s.agent+"::"+s.slug;
+  const open = state.open.has(id);
+  const title = s.display || s.name;
+  const sub = s.display ? s.name : "";
+  return `<button class="card" data-id="${esc(id)}" aria-expanded="${open}">
+    <span class="ct"><span class="dot" style="background:${colorOf(s.agent)}"></span><span class="cname">${mark(title)}</span>${s.version?`<span class="ver">v${esc(s.version)}</span>`:""}</span>
+    ${sub?`<div class="cslug">${mark(sub)}</div>`:""}
+    <div class="cdesc">${mark(s.desc || s.desc_en || "（无描述）")}</div>
+    <div class="tags">
+      ${state.view==="flat"?`<span class="tag src">${esc(labelOf(s.agent))}</span>`:""}
+      ${s.category?`<span class="tag">${esc(s.category)}</span>`:""}
+      ${s.plugin?`<span class="tag">${esc(s.plugin)}</span>`:""}
+      <span class="tag path" title="${esc(s.path)}">${esc(s.path.replace(/^\/Users\/[^/]+/,"~"))}</span>
+    </div>
+  </button>`;
+}
+
+function bindCards(root){
+  root.querySelectorAll(".card").forEach(c=>{
+    c.onclick = ()=>{
+      const id = c.dataset.id;
+      if(state.open.has(id)) state.open.delete(id); else state.open.add(id);
+      c.setAttribute("aria-expanded", state.open.has(id) ? "true" : "false");
+    };
+  });
+}
+
+function render(){
+  const list = DATA.skills.filter(match);
+  $("#tShow").textContent = list.length;
+  const main = $("#main");
+
+  if(!list.length){
+    main.innerHTML = `<div class="empty">没有匹配的 skill<button id="clearAll">清除筛选条件</button></div>`;
+    const c = $("#clearAll");
+    if(c) c.onclick = ()=>{ state.q=""; state.agent="all"; $("#q").value=""; renderChips(); render(); };
+    return;
+  }
+
+  if(state.view==="group"){
+    let h = "";
+    DATA.agents.forEach(a=>{
+      const items = list.filter(s=>s.agent===a.key);
+      if(!items.length) return;
+      h += `<section class="agent-block">
+        <div class="ahead">
+          <span class="dot" style="background:${a.color}"></span>
+          <h2>${esc(a.label)}</h2>
+          <span class="n">${items.length}</span>
+          <span class="p" title="${esc(a.root)}">${esc(a.root.replace(/^\/Users\/[^/]+/,"~"))}</span>
+        </div>
+        <div class="grid">${items.map(card).join("")}</div>
+      </section>`;
+    });
+    main.innerHTML = h;
+  } else {
+    let items = [...list];
+    if(state.sort==="name") items.sort((a,b)=>(a.display||a.name).localeCompare(b.display||b.name,"zh"));
+    else if(state.sort==="time") items.sort((a,b)=>b.mtime-a.mtime);
+    else items.sort((a,b)=>DATA.agents.findIndex(x=>x.key===a.agent)-DATA.agents.findIndex(x=>x.key===b.agent));
+    main.innerHTML = `<div class="grid">${items.map(card).join("")}</div>`;
+  }
+  bindCards(main);
+}
+
+$("#q").addEventListener("input", e=>{ state.q = e.target.value.trim(); render(); });
+document.addEventListener("keydown", e=>{
+  if(e.key==="/" && document.activeElement!==$("#q")){ e.preventDefault(); $("#q").focus(); }
+  if(e.key==="Escape"){ $("#q").value=""; state.q=""; $("#q").blur(); render(); }
+});
+function setPressed(group, el){
+  group.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", x===el ? "true":"false"));
+}
+$("#viewSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{
+  state.view=b.dataset.v; setPressed($("#viewSeg"), b); render();
+});
+$("#sortSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{
+  state.sort=b.dataset.s; setPressed($("#sortSeg"), b);
+  if(state.view==="group" && state.sort!=="agent"){
+    state.view="flat";
+    setPressed($("#viewSeg"), $("#viewSeg").querySelector('[data-v="flat"]'));
+  }
+  render();
+});
+
+renderChips(); render();
+</script>
+</body>
+</html>

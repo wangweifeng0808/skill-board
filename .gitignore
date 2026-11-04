@@ -1,0 +1,14 @@
+# local config, never commit
+/config.json
+
+# generated output
+/dist/
+/skills.json
+/popover.html
+
+# build artifacts
+/macos/SkillBar
+*.app
+
+# macOS
+.DS_Store

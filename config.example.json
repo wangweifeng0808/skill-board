@@ -1,0 +1,50 @@
+{
+  "title": "Skill Board",
+
+  "sources": [
+    {
+      "key": "codex",
+      "label": "Codex CLI",
+      "short": "Codex",
+      "path": "~/.codex/skills",
+      "depth": 2,
+      "color": "#2E8B62"
+    },
+    {
+      "key": "claude",
+      "label": "Claude Code",
+      "short": "Claude",
+      "path": "~/.claude/skills",
+      "depth": 2,
+      "color": "#C15F3C"
+    },
+    {
+      "key": "workbuddy",
+      "label": "WorkBuddy",
+      "short": "WorkBuddy",
+      "path": "~/.workbuddy/skills",
+      "depth": 2,
+      "color": "#2563EB"
+    },
+    {
+      "key": "plugins",
+      "label": "Plugins",
+      "short": "Plugins",
+      "path": "~/.workbuddy/plugins/cache",
+      "depth": 7,
+      "color": "#0E7C7B",
+      "slug_from": "after_skills",
+      "dedup": "parent+slug"
+    }
+  ],
+
+  "aliases": [
+    { "label": "Kimi CLI", "link": "~/.kimi/skills", "target": "~/.codex/skills" }
+  ],
+
+  "outputs": {
+    "json": "dist/skills.json",
+    "board": "dist/board.html",
+    "popover": "dist/popover.html"
+  }
+}
